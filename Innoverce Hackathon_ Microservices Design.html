@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Innoverce Hackathon: Microservices Design</title>
+<style>
+:root{color-scheme:dark;--bg:#050816;--fog:#101d44;--red:#ff2b3f;--ink:#e9eefc;--mute:#8d9bc4;--line:#22305f;--card:rgba(16,29,68,.55);
+--ai:#38e1ff;--chain:#ffb53a;--sec:#ff2b3f;--cloud:#4fb4ff;--game:#a66bff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:radial-gradient(120% 60% at 50% 0%,#14235a 0%,var(--bg) 60%);color:var(--ink);font:16px/1.55 "Trebuchet MS",system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+#beam{position:fixed;inset:0;pointer-events:none;background:radial-gradient(260px circle at var(--x,50%) var(--y,30%),rgba(190,225,255,.10),transparent 70%);z-index:0}
+main{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:28px 18px 60px}
+.tag{text-align:center;color:var(--mute);letter-spacing:.28em;font-size:.8rem}
+h1{font:700 clamp(2.4rem,9vw,5rem)/1 Georgia,"Times New Roman",serif;letter-spacing:.02em;text-align:center;margin:14px 0 4px;color:#ffd9dd;text-shadow:0 0 6px var(--red),0 0 22px var(--red),0 0 48px #b3001a}
+.sub{text-align:center;font:600 1.1rem Georgia,serif;letter-spacing:.5em;color:var(--red);text-shadow:0 0 12px var(--red);margin:0 0 6px}
+.lede{text-align:center;color:var(--mute);max-width:56ch;margin:14px auto 22px}
+.tracks{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:30px}
+.chip{border:1px solid currentColor;border-radius:999px;padding:5px 14px;font-size:.88rem;box-shadow:0 0 12px -2px currentColor;background:rgba(5,8,22,.6)}
+h2{font:700 1.4rem Georgia,serif;margin:34px 0 12px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.svc{all:unset;box-sizing:border-box;cursor:pointer;display:block;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c,var(--mute));border-radius:6px;padding:12px 14px;transition:transform .15s,box-shadow .2s,opacity .2s}
+.svc:hover{transform:translateY(-2px)}
+.svc:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.svc b{display:block;font-size:1rem}
+.svc span{color:var(--mute);font-size:.85rem}
+.svc.on{box-shadow:0 0 0 1px var(--c),0 0 26px -4px var(--c);background:rgba(30,45,95,.75)}
+.svc.rel{box-shadow:0 0 0 1px var(--mute)}
+.dim .svc:not(.on):not(.rel){opacity:.35}
+.bus{margin:14px 0;border:1px dashed var(--red);border-radius:6px;padding:10px 14px;text-align:center;color:#ffc6cc;background:rgba(255,43,63,.07);text-shadow:0 0 10px rgba(255,43,63,.6)}
+#detail{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px 20px;margin-top:16px;min-height:150px}
+#detail h3{margin:0 0 4px;font:700 1.3rem Georgia,serif}
+#detail p{margin:0 0 12px;color:var(--mute)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.cols h4{margin:0 0 4px;font-size:.9rem;color:var(--ink)}
+.cols ul{margin:0;padding-left:18px;color:#c4cff0;font-size:.9rem}
+code{font:.82rem Consolas,monospace;color:var(--ai)}
+ol.flow{list-style:none;margin:0;padding:0;counter-reset:s}
+ol.flow li{counter-increment:s;position:relative;padding:8px 0 8px 40px;border-left:2px solid var(--line);margin-left:14px;cursor:pointer}
+ol.flow li::before{content:counter(s);position:absolute;left:-15px;top:8px;width:28px;height:28px;border-radius:50%;background:var(--bg);border:1px solid var(--red);color:var(--red);display:grid;place-items:center;font-size:.85rem;box-shadow:0 0 10px rgba(255,43,63,.5)}
+ol.flow li:hover,ol.flow li:focus-visible{color:#fff}
+ol.flow small{display:block;color:var(--mute)}
+.note{color:var(--mute);font-size:.9rem;margin-top:10px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="beam"></div>
+<main>
+<div class="tag">IDEAS × CODE × IMPACT</div>
+<h1>INNOVERCE</h1>
+<p class="sub">HACKATHON</p>
+<p class="lede">The platform behind the event: nine small services that handle sign-ups, teams, submissions, judging and a live leaderboard across five tracks. Tap a service to see what it owns and who it talks to.</p>
+<div class="tracks">
+<span class="chip" style="color:var(--ai)">AI/ML</span><span class="chip" style="color:var(--chain)">Blockchain &amp; Web3</span><span class="chip" style="color:var(--sec)">Cybersecurity</span><span class="chip" style="color:var(--cloud)">Cloud &amp; DevOps</span><span class="chip" style="color:var(--game)">Game Development</span>
+</div>
+
+<h2>The architecture</h2>
+<div id="map">
+<div class="row" id="r0"></div>
+<div class="bus">Event bus (Kafka or RabbitMQ): services announce what happened, others react</div>
+<div class="row" id="r1"></div>
+</div>
+<div id="detail"><h3>Pick a service</h3><p>Select any card above. Related services light up, and you’ll see its data store, APIs and events.</p></div>
+
+<h2>Follow one submission</h2>
+<ol class="flow" id="flow"></ol>
+<p class="note">Tap a step to highlight the services involved.</p>
+</main>
+<script>
+const S={
+gateway:{n:"API Gateway",c:"#4fb4ff",d:"Single front door for the web app and mobile app.",db:"Redis (rate limits)",own:["Routes requests to services","Checks the JWT on every call","Rate limiting and CORS"],api:["<code>/api/*</code> proxied to services"],pub:[],sub:[],talks:["auth","team","event","submission","judging","leaderboard"]},
+auth:{n:"Auth Service",c:"#ff2b3f",d:"Who you are and what you may do.",db:"PostgreSQL",own:["Sign-up, login, GitHub/Google OAuth","Issues and refreshes JWTs","Roles: participant, mentor, judge, admin"],api:["<code>POST /auth/register</code>","<code>POST /auth/login</code>","<code>POST /auth/refresh</code>"],pub:["user.registered"],sub:[],talks:["gateway","notify"]},
+team:{n:"Team Service",c:"#38e1ff",d:"Builds the squads that compete together.",db:"PostgreSQL",own:["Create teams, invite and join","Team size limits per track","Profiles: skills, college, links"],api:["<code>POST /teams</code>","<code>POST /teams/{id}/invite</code>","<code>GET /teams/{id}</code>"],pub:["team.created","team.member_joined"],sub:["user.registered"],talks:["gateway","submission","notify"]},
+event:{n:"Hackathon Service",c:"#ffb53a",d:"The rulebook: tracks, rounds and schedule.",db:"PostgreSQL",own:["Five tracks and their problem statements","Rounds, deadlines, prizes","Registration open/close"],api:["<code>GET /hackathons/{id}</code>","<code>GET /tracks</code>","<code>POST /hackathons</code> (admin)"],pub:["track.published","deadline.reached"],sub:[],talks:["gateway","submission","notify"]},
+submission:{n:"Submission Service",c:"#a66bff",d:"Where projects are handed in.",db:"MongoDB + S3-compatible storage",own:["Repo link, demo video, slides","Versioned drafts until the deadline","Checks the team and track exist"],api:["<code>POST /submissions</code>","<code>PUT /submissions/{id}</code>","<code>GET /submissions?track=</code>"],pub:["submission.created","submission.updated"],sub:["team.created","deadline.reached"],talks:["gateway","team","event","judging"]},
+judging:{n:"Judging Service",c:"#ffb53a",d:"Fair, rubric-based scoring.",db:"PostgreSQL",own:["Rubrics per track","Assigns judges, avoids conflicts","Stores scores and comments"],api:["<code>GET /judges/me/queue</code>","<code>POST /scores</code>"],pub:["score.recorded"],sub:["submission.created"],talks:["gateway","submission","leaderboard"]},
+leaderboard:{n:"Leaderboard Service",c:"#38e1ff",d:"Live rankings, fast to read.",db:"Redis sorted sets",own:["Ranking overall and per track","Builds its own read model from events","Pushes updates over WebSocket"],api:["<code>GET /leaderboard?track=</code>","<code>WS /leaderboard/live</code>"],pub:[],sub:["score.recorded"],talks:["gateway","judging"]},
+notify:{n:"Notification Service",c:"#ff2b3f",d:"Tells people what they need to know.",db:"PostgreSQL (templates, delivery log)",own:["Email, push and WhatsApp","Templates and retries","Opt-outs"],api:["Mostly event-driven, <code>GET /notifications/me</code>"],pub:[],sub:["user.registered","team.member_joined","submission.created","score.recorded","deadline.reached"],talks:["auth","team","event"]}
+};
+const order0=["gateway","auth","team","event"],order1=["submission","judging","leaderboard","notify"];
+const map=document.getElementById("map"),det=document.getElementById("detail");
+function mk(id){const s=S[id],b=document.createElement("button");b.className="svc";b.style.setProperty("--c",s.c);b.dataset.id=id;b.innerHTML="<b>"+s.n+"</b><span>"+s.d+"</span>";b.onclick=()=>pick(id);return b}
+order0.forEach(i=>r0.appendChild(mk(i)));order1.forEach(i=>r1.appendChild(mk(i)));
+function mark(ids,main){map.classList.toggle("dim",!!ids.length);document.querySelectorAll(".svc").forEach(e=>{const i=e.dataset.id;e.classList.toggle("on",i===main||(!main&&ids.includes(i)));e.classList.toggle("rel",!!main&&i!==main&&ids.includes(i))})}
+function li(a){return a.length?"<ul>"+a.map(x=>"<li>"+x+"</li>").join("")+"</ul>":"<ul><li>None</li></ul>"}
+function pick(id){const s=S[id];mark(s.talks,id);
+det.innerHTML="<h3>"+s.n+"</h3><p>"+s.d+" Data store: <b>"+s.db+"</b></p><div class='cols'><div><h4>Owns</h4>"+li(s.own)+"</div><div><h4>Endpoints</h4>"+li(s.api)+"</div><div><h4>Events it sends</h4>"+li(s.pub.map(e=>"<code>"+e+"</code>"))+"</div><div><h4>Events it listens to</h4>"+li(s.sub.map(e=>"<code>"+e+"</code>"))+"</div></div>"}
+const F=[["Participant uploads the project",["gateway","auth"],"The gateway verifies the JWT before anything else runs."],["Submission Service checks the team and track",["submission","team","event"],"A quick synchronous call; the project is rejected if the team or deadline is invalid."],["Files saved, <code>submission.created</code> sent",["submission"],"Large files go to object storage; only the link is kept in the database."],["Judging assigns judges from the track pool",["judging"],"Skips judges who mentored that team."],["Team gets a confirmation",["notify"],"Email and push go out; the upload never waits for them."],["Judges score, <code>score.recorded</code> sent",["judging","leaderboard"],"The leaderboard updates its ranking and pushes it live."]];
+const fl=document.getElementById("flow");
+F.forEach(f=>{const l=document.createElement("li");l.tabIndex=0;l.innerHTML=f[0]+"<small>"+f[2]+"</small>";const go=()=>{mark(f[1],null);det.innerHTML="<h3>"+f[0]+"</h3><p>"+f[2]+"</p>"};l.onclick=go;l.onkeydown=e=>{if(e.key==="Enter")go()};fl.appendChild(l)});
+addEventListener("pointermove",e=>{const b=document.getElementById("beam");b.style.setProperty("--x",e.clientX+"px");b.style.setProperty("--y",e.clientY+"px")});
+</script>
+</body>
+</html>
